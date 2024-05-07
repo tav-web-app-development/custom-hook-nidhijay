@@ -1,35 +1,49 @@
-import { useState } from 'react'
+// import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+import React, { useState, useEffect, useRef } from 'react';
+
+// Custom hook to get current time every second
+const useTime = () => {
+  const [time, setTime] = useState(new Date());
+
+  // Ref to store interval ID for cleanup
+  const intervalRef = useRef();
+
+  useEffect(() => {
+    // Function to update time every second
+    const updateTime = () => {
+      setTime(new Date());
+    };
+
+    // Start interval and store its ID in ref
+    intervalRef.current = setInterval(updateTime, 1000);
+
+    // Cleanup function to clear interval on unmount
+    return () => clearInterval(intervalRef.current);
+  }, []); // Run effect only once on mount
+
+  return time;
+};
+
+// Clock component to display time with AM/PM
+const Clock = () => {
+  const time = useTime();
+  const hours = time.getHours();
+  const minutes = time.getMinutes();
+  const seconds = time.getSeconds();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const formattedHours = hours % 12 || 12; // Convert 24-hour time to 12-hour time
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div>
+      <h1>
+        {formattedHours}:{minutes < 10 ? '0' : ''}{minutes}:{seconds < 10 ? '0' : ''}{seconds} {ampm}
+      </h1>
+    </div>
+  );
+};
 
-export default App
+export default Clock;
